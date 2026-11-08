@@ -1547,7 +1547,7 @@ function renderTodos(){
 
     if(currentMode === "today"){
 
-        tasks.forEach(
+        sortTodayTasks(tasks).forEach(
 
             task =>
             todoList.appendChild(
@@ -1627,6 +1627,10 @@ function addTaskToProject(project, text){
         detail: "",
 
         done: false,
+
+        priority: 0,
+
+        createdAt: Date.now(),
 
         project_id: project ? project.id : null
     };
@@ -1840,6 +1844,365 @@ function moveTask(task, project, listEl){
 
         active.classList.add("active");
     }
+}
+
+// -------------------------
+// Priority（仅 Today）
+// -------------------------
+
+function taskPriority(task){
+
+    return Number(task.priority) || 0;
+}
+
+function taskCreatedAt(task){
+
+    return task.createdAt || Number(task.id) || 0;
+}
+
+// 高优先级在前；同一优先级按加入时间从早到晚；已完成沉底
+
+function sortTodayTasks(tasks){
+
+    return tasks.slice().sort(
+        (a, b)=>{
+
+            if(Boolean(a.done) !== Boolean(b.done)){
+
+                return a.done ? 1 : -1;
+            }
+
+            const pa = taskPriority(a);
+
+            const pb = taskPriority(b);
+
+            if(pa !== pb){
+
+                return pb - pa;
+            }
+
+            return taskCreatedAt(a) - taskCreatedAt(b);
+        }
+    );
+}
+
+function prioritySectionHTML(task){
+
+    if(currentMode !== "today"){
+
+        return "";
+    }
+
+    const value = taskPriority(task);
+
+    return `
+
+        <div class="priority-control">
+
+            <div class="priority-head">
+
+                <span class="settings-label">
+                优先级
+                </span>
+
+                <span
+                 class="priority-value"
+                 id="priorityValue">${value}%</span>
+
+            </div>
+
+            <div
+             class="priority-slider"
+             id="prioritySlider"
+             role="slider"
+             aria-label="优先级"
+             aria-valuemin="0"
+             aria-valuemax="100"
+             aria-valuenow="${value}"
+             style="--p:${value}">
+
+                <div class="priority-track"></div>
+
+                <div class="priority-fill"></div>
+
+                <span class="priority-star" style="left:18%">✦</span>
+
+                <span class="priority-star" style="left:40%">✧</span>
+
+                <span class="priority-star" style="left:62%">✦</span>
+
+                <span class="priority-star" style="left:84%">✧</span>
+
+                <div class="priority-thumb" id="priorityThumb"></div>
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+// 0% 白色 → 100% 紫色
+
+function thumbRGB(pct){
+
+    const t = pct / 100;
+
+    const r = Math.round(255 + (124 - 255) * t);
+
+    const g = Math.round(255 + (92 - 255) * t);
+
+    const b = Math.round(255 + (255 - 255) * t);
+
+    return `${r}, ${g}, ${b}`;
+}
+
+function priorityValueColor(pct){
+
+    const t = pct / 100;
+
+    const r = Math.round(154 + (107 - 154) * t);
+
+    const g = Math.round(160 + (91 - 160) * t);
+
+    const b = Math.round(180 + (214 - 180) * t);
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
+function bindPrioritySlider(task){
+
+    const slider =
+        document.getElementById("prioritySlider");
+
+    if(!slider){
+
+        return;
+    }
+
+    const thumb =
+        document.getElementById("priorityThumb");
+
+    const valueEl =
+        document.getElementById("priorityValue");
+
+    const render = pct=>{
+
+        slider.style.setProperty(
+            "--p",
+            String(pct)
+        );
+
+        thumb.style.setProperty(
+            "--thumb-rgb",
+            thumbRGB(pct)
+        );
+
+        valueEl.textContent = pct + "%";
+
+        valueEl.style.color =
+            priorityValueColor(pct);
+
+        slider.setAttribute(
+            "aria-valuenow",
+            String(pct)
+        );
+    };
+
+    let current = taskPriority(task);
+
+    render(current);
+
+    const pctFromEvent = event=>{
+
+        const rect =
+            slider.getBoundingClientRect();
+
+        if(!rect.width){
+
+            return current;
+        }
+
+        const ratio =
+            (event.clientX - rect.left) /
+            rect.width;
+
+        return Math.max(
+            0,
+            Math.min(100, Math.round(ratio * 100))
+        );
+    };
+
+    let dragging = false;
+
+    slider.addEventListener(
+        "pointerdown",
+        event=>{
+
+            dragging = true;
+
+            slider.classList.add("dragging");
+
+            if(slider.setPointerCapture){
+
+                slider.setPointerCapture(
+                    event.pointerId
+                );
+            }
+
+            current = pctFromEvent(event);
+
+            render(current);
+        }
+    );
+
+    slider.addEventListener(
+        "pointermove",
+        event=>{
+
+            if(!dragging){
+
+                return;
+            }
+
+            current = pctFromEvent(event);
+
+            render(current);
+        }
+    );
+
+    slider.addEventListener(
+        "pointerup",
+        async event=>{
+
+            if(!dragging){
+
+                return;
+            }
+
+            dragging = false;
+
+            slider.classList.remove("dragging");
+
+            if(
+                slider.hasPointerCapture &&
+                slider.hasPointerCapture(
+                    event.pointerId
+                )
+            ){
+
+                slider.releasePointerCapture(
+                    event.pointerId
+                );
+            }
+
+            // 数值未变就不重排
+
+            if(taskPriority(task) === current){
+
+                return;
+            }
+
+            task.priority = current;
+
+            saveState();
+
+            reorderTodayList();
+
+            await updateTodoInCloud(
+                task.id,
+                { priority: current }
+            );
+        }
+    );
+
+    slider.addEventListener(
+        "pointercancel",
+        ()=>{
+
+            dragging = false;
+
+            slider.classList.remove("dragging");
+        }
+    );
+}
+
+// 按优先级就地重排今天列表（FLIP 动画，不重建节点）
+
+function reorderTodayList(){
+
+    if(currentMode !== "today"){
+
+        return;
+    }
+
+    const items = Array.from(
+        todoList.querySelectorAll(".todo-item")
+    );
+
+    if(!items.length){
+
+        return;
+    }
+
+    const before = new Map();
+
+    items.forEach(li=>{
+
+        before.set(
+            li,
+            li.getBoundingClientRect().top
+        );
+    });
+
+    sortTodayTasks(state.today).forEach(task=>{
+
+        const li = items.find(
+            item =>
+                item.dataset.taskId ===
+                String(task.id)
+        );
+
+        if(li){
+
+            todoList.appendChild(li);
+        }
+    });
+
+    items.forEach(li=>{
+
+        const dy =
+            before.get(li) -
+            li.getBoundingClientRect().top;
+
+        if(!dy){
+
+            return;
+        }
+
+        li.style.transition = "none";
+
+        li.style.transform =
+            `translateY(${dy}px)`;
+
+        void li.offsetHeight;
+
+        li.style.transition =
+            "transform .36s cubic-bezier(.4,0,.2,1)";
+
+        li.style.transform = "";
+
+        li.addEventListener(
+            "transitionend",
+            ()=>{
+
+                li.style.transition = "";
+
+                li.style.transform = "";
+            },
+            { once:true }
+        );
+    });
 }
 
 // -------------------------
@@ -2535,6 +2898,10 @@ function buildTaskItem(task, groupEl){
 
                 saveState();
 
+                // Today：已完成沉到最底部
+
+                reorderTodayList();
+
                 updateTodoInCloud(
 
                     task.id,
@@ -2671,6 +3038,8 @@ function buildTaskItem(task, groupEl){
                             class="detail-input"
                             placeholder="点击添加说明..."></textarea>
 
+                        ${prioritySectionHTML(task)}
+
                         ${moveSectionHTML(task)}
 
                     </div>
@@ -2706,6 +3075,8 @@ function buildTaskItem(task, groupEl){
 
                     detailInput.value =
                         task.detail || "";
+
+                    bindPrioritySlider(task);
 
                     bindMoveTargets(task);
 
@@ -2844,6 +3215,9 @@ async function saveTodoToCloud(task){
         done:
             task.done,
 
+        priority:
+            task.priority || 0,
+
         mode:
             currentMode,
 
@@ -2888,6 +3262,23 @@ async function saveTodoToCloud(task){
     ){
 
         delete row.project_id;
+
+        ({ error } =
+
+        await sbClient
+
+            .from("todo")
+
+            .insert(row));
+    }
+
+    if(
+        error &&
+        String(error.message)
+        .includes("priority")
+    ){
+
+        delete row.priority;
 
         ({ error } =
 
@@ -3093,6 +3484,16 @@ async function loadTodosFromCloud(){
 
                         done: todo.done,
 
+                        priority:
+                            Number(todo.priority) || 0,
+
+                        createdAt:
+                            todo.created_at
+                            ? new Date(
+                                todo.created_at
+                            ).getTime()
+                            : Number(todo.id) || 0,
+
                         project_id:
                             todo.project_id === undefined
                             ? null
@@ -3270,6 +3671,10 @@ function addTask(){
         detail:"",
 
         done:false,
+
+        priority: 0,
+
+        createdAt: Date.now(),
 
         project_id:null
     };
