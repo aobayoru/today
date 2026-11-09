@@ -190,6 +190,14 @@
 
             <div id="accountSection">
 
+                <button
+                    id="accountCloseBtn"
+                    class="sheet-close"
+                    type="button"
+                    aria-label="关闭">
+                    ✕
+                </button>
+
                 <button id="accountBtn">
 
                     LOGIN
@@ -226,77 +234,7 @@
 
         </div>
 
-        <!-- 手机端底部功能栏 -->
-
-        <nav
-            id="mobileBar"
-            class="mobile-bar"
-            aria-label="功能栏">
-
-            <button
-                id="barSomedayBtn"
-                class="bar-item"
-                type="button">
-
-                <span class="bar-icon">🌱</span>
-
-                <span class="bar-label">Someday</span>
-
-            </button>
-
-            <button
-                id="barArchiveBtn"
-                class="bar-item"
-                type="button">
-
-                <span class="bar-icon">📦</span>
-
-                <span class="bar-label">Archive</span>
-
-            </button>
-
-            <button
-                id="barThemeBtn"
-                class="bar-item"
-                type="button">
-
-                <span class="bar-icon">🌙</span>
-
-                <span class="bar-label">夜间</span>
-
-            </button>
-
-            <button
-                id="barAboutBtn"
-                class="bar-item"
-                type="button">
-
-                <span class="bar-icon">✿</span>
-
-                <span class="bar-label">About</span>
-
-            </button>
-
-            <button
-                id="barAccountBtn"
-                class="bar-item"
-                type="button">
-
-                <span class="bar-icon">☺</span>
-
-                <span class="bar-label">账号</span>
-
-            </button>
-
-        </nav>
-
-        <!-- 抽屉遮罩 -->
-
-        <div
-            id="sheetBackdrop"
-            class="sheet-backdrop">
-        </div>
-
+        
     </main>
 
     <!-- Archive 页面 -->
@@ -429,6 +367,69 @@
         </article>
 
     </main>
+
+    <!-- 手机端底部功能栏 -->
+
+    <nav
+        id="mobileNav"
+        aria-label="主要功能">
+
+        <button
+            class="nav-btn"
+            type="button"
+            data-nav="today">
+
+            <span class="nav-icon">🌤️</span>
+
+            <span class="nav-label">Today</span>
+
+        </button>
+
+        <button
+            class="nav-btn"
+            type="button"
+            data-nav="someday">
+
+            <span class="nav-icon">🌱</span>
+
+            <span class="nav-label">Someday</span>
+
+        </button>
+
+        <button
+            class="nav-btn"
+            type="button"
+            data-nav="archive">
+
+            <span class="nav-icon">📦</span>
+
+            <span class="nav-label">Archive</span>
+
+        </button>
+
+        <button
+            class="nav-btn"
+            type="button"
+            data-nav="about">
+
+            <span class="nav-icon">🌼</span>
+
+            <span class="nav-label">About</span>
+
+        </button>
+
+        <button
+            class="nav-btn"
+            type="button"
+            data-nav="account">
+
+            <span class="nav-icon">👤</span>
+
+            <span class="nav-label">Account</span>
+
+        </button>
+
+    </nav>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 

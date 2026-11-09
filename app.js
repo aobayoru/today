@@ -528,58 +528,22 @@ document.getElementById(
     "themeBtn"
 );
 
-const mobileBar =
-document.getElementById(
-    "mobileBar"
-);
+if(authPanel){
 
-const barSomedayBtn =
-document.getElementById(
-    "barSomedayBtn"
-);
+    accountBtn.addEventListener(
 
-const barArchiveBtn =
-document.getElementById(
-    "barArchiveBtn"
-);
+        "click",
 
-const barThemeBtn =
-document.getElementById(
-    "barThemeBtn"
-);
+        ()=>{
 
-const barAboutBtn =
-document.getElementById(
-    "barAboutBtn"
-);
+            authPanel.classList.toggle(
+                "hidden"
+            );
 
-const barAccountBtn =
-document.getElementById(
-    "barAccountBtn"
-);
+        }
 
-const sheetBackdrop =
-document.getElementById(
-    "sheetBackdrop"
-);
-
-const accountSection =
-document.getElementById(
-    "accountSection"
-);
-
-accountBtn.addEventListener(
-
-    "click",
-
-    ()=>{
-
-        authPanel.classList.toggle(
-            "hidden"
-        );
-
-    }
-);
+    );
+}
 
 // // signupBtn.addEventListener(
 
@@ -1004,6 +968,8 @@ function showEmptyDetail(){
     selectedTaskId = null;
 
     selectedProjectId = null;
+
+    closeDetailSheet();
 
     renderEmptyDetailContent();
 }
@@ -1604,6 +1570,8 @@ function renderTodos(){
 
         renderProfileStats();
 
+        updateMobileNav();
+
         return;
     }
 
@@ -1657,6 +1625,8 @@ function renderTodos(){
     updateAddBarState();
 
     renderProfileStats();
+
+    updateMobileNav();
 }
 
 async function addTaskToProject(project, text){
@@ -2311,6 +2281,8 @@ function selectGroup(project){
     if(project){
 
         renderProjectSettings(project);
+
+        openDetailSheet();
 
     }else{
 
@@ -3116,6 +3088,8 @@ function buildTaskItem(task, groupEl){
                         "detail-fade"
                     );
 
+                    openDetailSheet();
+
                     const titleInput =
                     document.getElementById(
                         "titleInput"
@@ -3825,55 +3799,62 @@ document.getElementById(
     "pageTitle"
 );
 
-function toggleSomedayMode(){
-
-    if(
-        currentMode ===
-        "today"
-    ){
-
-        currentMode =
-            "someday";
-
-        pageTitle.textContent =
-            "Someday";
-
-    }else{
-
-        currentMode =
-            "today";
-
-        pageTitle.textContent =
-            "Today";
-    }
-
-    pageTitle.classList.remove(
-        "title-switch"
-    );
-
-    void pageTitle.offsetWidth;
-
-    pageTitle.classList.add(
-        "title-switch"
-    );
-
-    selectedTaskId = null;
-
-    selectedProjectId = null;
-
-    showEmptyDetail();
-
-    closeSheets();
-
-    renderTodos();
-}
-
 somedayBtn.addEventListener(
 
     "click",
 
-    toggleSomedayMode
-);
+    ()=>{
+
+        if(
+            currentMode ===
+            "today"
+        ){
+
+            currentMode =
+                "someday";
+
+            pageTitle.textContent =
+                "Someday";
+
+            pageTitle.classList.remove(
+                "title-switch"
+            );
+
+            void pageTitle.offsetWidth;
+
+            pageTitle.classList.add(
+                "title-switch"
+            );
+
+        }else{
+
+            currentMode =
+                "today";
+
+            pageTitle.textContent =
+                "Today";
+
+            pageTitle.classList.remove(
+                "title-switch"
+            );
+
+            void pageTitle.offsetWidth;
+
+            pageTitle.classList.add(
+                "title-switch"
+            );
+        }
+
+        
+         selectedTaskId = null;
+
+        selectedProjectId = null;
+
+        showEmptyDetail();
+
+        renderTodos();
+    }
+);  
 
 taskInput.addEventListener(
 
@@ -4844,8 +4825,6 @@ function switchPage(
 
 function showArchive(){
 
-    closeSheets();
-
     renderArchive();
 
     switchPage(
@@ -4853,17 +4832,19 @@ function showArchive(){
         archivePage,
         "forward"
     );
+
+    setMobileNavActive("archive");
 }
 
 function showAbout(){
-
-    closeSheets();
 
     switchPage(
         todayPage,
         aboutPage,
         "forward"
     );
+
+    setMobileNavActive("about");
 }
 
 function showTodayFromAbout(){
@@ -4873,6 +4854,12 @@ function showTodayFromAbout(){
         todayPage,
         "back"
     );
+
+    setMobileNavActive(
+        currentMode === "someday"
+        ? "someday"
+        : "today"
+    );
 }
 
 function showToday(){
@@ -4881,6 +4868,12 @@ function showToday(){
         archivePage,
         todayPage,
         "back"
+    );
+
+    setMobileNavActive(
+        currentMode === "someday"
+        ? "someday"
+        : "today"
     );
 }
 
@@ -4911,6 +4904,286 @@ aboutBackBtn.addEventListener(
 
     showTodayFromAbout
 );
+
+// -------------------------
+// 手机 · 底部导航与抽屉
+// -------------------------
+
+const mobileNav =
+document.getElementById(
+    "mobileNav"
+);
+
+function openDetailSheet(){
+
+    if(!detailPanel){
+
+        return;
+    }
+
+    if(
+        !detailPanel.querySelector(
+            ".sheet-close"
+        )
+    ){
+
+        const closeBtn =
+            document.createElement(
+                "button"
+            );
+
+        closeBtn.type = "button";
+
+        closeBtn.className =
+            "sheet-close";
+
+        closeBtn.setAttribute(
+            "aria-label",
+            "关闭"
+        );
+
+        closeBtn.textContent = "✕";
+
+        closeBtn.addEventListener(
+            "click",
+            showEmptyDetail
+        );
+
+        detailPanel.prepend(
+            closeBtn
+        );
+    }
+
+    detailPanel.classList.add(
+        "sheet-open"
+    );
+}
+
+function closeDetailSheet(){
+
+    if(!detailPanel){
+
+        return;
+    }
+
+    detailPanel.classList.remove(
+        "sheet-open"
+    );
+}
+
+function setMobileNavActive(name){
+
+    if(!mobileNav){
+
+        return;
+    }
+
+    mobileNav
+    .querySelectorAll(".nav-btn")
+    .forEach(
+        btn =>
+        btn.classList.toggle(
+            "active",
+            btn.dataset.nav === name
+        )
+    );
+}
+
+function updateMobileNav(){
+
+    if(!mobileNav){
+
+        return;
+    }
+
+    let active =
+        document.body.classList.contains(
+            "account-open"
+        )
+        ? "account"
+        : "";
+
+    if(!active){
+
+        if(
+            !aboutPage.classList.contains(
+                "hidden"
+            )
+        ){
+
+            active = "about";
+
+        }else if(
+            !archivePage.classList.contains(
+                "hidden"
+            )
+        ){
+
+            active = "archive";
+
+        }else{
+
+            active =
+                currentMode === "someday"
+                ? "someday"
+                : "today";
+        }
+    }
+
+    setMobileNavActive(active);
+}
+
+if(mobileNav){
+
+    mobileNav.addEventListener(
+
+        "click",
+
+        event=>{
+
+            const btn =
+                event.target.closest(
+                    ".nav-btn"
+                );
+
+            if(!btn){
+
+                return;
+            }
+
+            const target =
+                btn.dataset.nav;
+
+            const accountWasOpen =
+                document.body.classList.contains(
+                    "account-open"
+                );
+
+            document.body.classList.remove(
+                "account-open"
+            );
+
+            closeDetailSheet();
+
+            const onArchive =
+                !archivePage.classList.contains(
+                    "hidden"
+                );
+
+            const onAbout =
+                !aboutPage.classList.contains(
+                    "hidden"
+                );
+
+            if(target === "account"){
+
+                if(!accountWasOpen){
+
+                    if(onArchive){
+
+                        showToday();
+
+                    }else if(onAbout){
+
+                        showTodayFromAbout();
+                    }
+
+                    document.body.classList.add(
+                        "account-open"
+                    );
+                }
+
+            }else if(target === "archive"){
+
+                if(!onArchive){
+
+                    if(onAbout){
+
+                        renderArchive();
+
+                        switchPage(
+                            aboutPage,
+                            archivePage,
+                            "forward"
+                        );
+
+                    }else{
+
+                        showArchive();
+                    }
+                }
+
+            }else if(target === "about"){
+
+                if(!onAbout){
+
+                    if(onArchive){
+
+                        switchPage(
+                            archivePage,
+                            aboutPage,
+                            "forward"
+                        );
+
+                    }else{
+
+                        showAbout();
+                    }
+                }
+
+            }else{
+
+                if(onArchive){
+
+                    showToday();
+
+                }else if(onAbout){
+
+                    showTodayFromAbout();
+                }
+
+                if(currentMode !== target){
+
+                    somedayBtn.click();
+                }
+            }
+
+            setMobileNavActive(
+                target === "account" &&
+                accountWasOpen
+                ? "today"
+                : target
+            );
+
+            setTimeout(
+                updateMobileNav,
+                660
+            );
+        }
+    );
+}
+
+const accountCloseBtn =
+document.getElementById(
+    "accountCloseBtn"
+);
+
+if(accountCloseBtn){
+
+    accountCloseBtn.addEventListener(
+
+        "click",
+
+        ()=>{
+
+            document.body.classList.remove(
+                "account-open"
+            );
+
+            updateMobileNav();
+        }
+    );
+}
 
 // -------------------------
 // Theme（夜间模式）
@@ -4965,22 +5238,6 @@ function applyTheme(theme){
         theme === "night"
         ? "☀️"
         : "🌙";
-    }
-
-    if(barThemeBtn){
-
-        const icon =
-        barThemeBtn.querySelector(
-            ".bar-icon"
-        );
-
-        if(icon){
-
-            icon.textContent =
-            theme === "night"
-            ? "☀️"
-            : "🌙";
-        }
     }
 }
 
@@ -5040,188 +5297,6 @@ darkQuery.addEventListener(
 );
 
 // -------------------------
-// 手机端底部功能栏 · 抽屉
-// -------------------------
-
-function refreshSheetBackdrop(){
-
-    const open =
-
-        (detailPanel &&
-        detailPanel.classList.contains(
-            "detail-open"
-        ))
-        ||
-
-        (accountSection &&
-        accountSection.classList.contains(
-            "account-open"
-        ));
-
-    document.body.classList.toggle(
-        "sheet-open",
-        !!open
-    );
-}
-
-function closeSheets(){
-
-    if(detailPanel){
-
-        detailPanel.classList.remove(
-            "detail-open"
-        );
-    }
-
-    if(accountSection){
-
-        accountSection.classList.remove(
-            "account-open"
-        );
-    }
-
-    document.body.classList.remove(
-        "sheet-open"
-    );
-}
-
-if(detailPanel){
-
-    const detailObserver =
-
-    new MutationObserver(()=>{
-
-        const hasDetail =
-
-        detailPanel.querySelector(
-            ".empty-detail"
-        ) === null;
-
-        detailPanel.classList.toggle(
-            "detail-open",
-            hasDetail
-        );
-
-        if(hasDetail && accountSection){
-
-            accountSection.classList.remove(
-                "account-open"
-            );
-        }
-
-        refreshSheetBackdrop();
-    });
-
-    detailObserver.observe(
-
-        detailPanel,
-
-        {
-            childList:true
-        }
-    );
-}
-
-if(barSomedayBtn){
-
-    barSomedayBtn.addEventListener(
-
-        "click",
-
-        toggleSomedayMode
-    );
-}
-
-if(barArchiveBtn){
-
-    barArchiveBtn.addEventListener(
-
-        "click",
-
-        showArchive
-    );
-}
-
-if(barThemeBtn){
-
-    barThemeBtn.addEventListener(
-
-        "click",
-
-        toggleTheme
-    );
-}
-
-if(barAboutBtn){
-
-    barAboutBtn.addEventListener(
-
-        "click",
-
-        showAbout
-    );
-}
-
-if(barAccountBtn){
-
-    barAccountBtn.addEventListener(
-
-        "click",
-
-        ()=>{
-
-            const willOpen =
-
-            !accountSection.classList.contains(
-                "account-open"
-            );
-
-            if(willOpen){
-
-                showEmptyDetail();
-            }
-
-            accountSection.classList.toggle(
-                "account-open",
-                willOpen
-            );
-
-            refreshSheetBackdrop();
-        }
-    );
-}
-
-if(sheetBackdrop){
-
-    sheetBackdrop.addEventListener(
-
-        "click",
-
-        ()=>{
-
-            if(
-                detailPanel &&
-                detailPanel.classList.contains(
-                    "detail-open"
-                )
-            ){
-
-                showEmptyDetail();
-            }
-
-            if(accountSection){
-
-                accountSection.classList.remove(
-                    "account-open"
-                );
-            }
-
-            refreshSheetBackdrop();
-        }
-    );
-}
-
-// -------------------------
 // Init
 // -------------------------
 
@@ -5249,6 +5324,8 @@ renderDate();
 renderTodos();
 
 renderArchive();
+
+updateMobileNav();
 
 (async ()=>{
 

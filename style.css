@@ -3959,11 +3959,15 @@ body{
 }
 
 /* ========================= */
-/* 手机端：底部功能栏 · 免上下滑动 */
+/* 手机 · 底部功能栏 + 整屏布局 */
 /* ========================= */
 
-.mobile-bar,
-.sheet-backdrop{
+#mobileNav{
+
+    display:none;
+}
+
+.sheet-close{
 
     display:none;
 }
@@ -3973,30 +3977,25 @@ body{
     html,
     body{
 
-        height:100vh;
-
-        height:100dvh;
+        height:100%;
 
         overflow:hidden;
 
         overscroll-behavior:none;
     }
 
+    body{
+
+        height:100dvh;
+    }
+
+    /* 页面占满视口，滚动只发生在内部列表 */
+
     .page{
 
-        position:fixed;
-
-        top:0;
-
-        left:0;
-
-        right:0;
-
-        bottom:0;
+        inset:0;
 
         width:auto;
-
-        height:100vh;
 
         height:100dvh;
 
@@ -4010,81 +4009,84 @@ body{
 
         padding:
 
-            calc(env(safe-area-inset-top) + 16px)
+            max(14px, env(safe-area-inset-top))
 
-            max(16px, env(safe-area-inset-right))
+            max(14px, env(safe-area-inset-right))
 
-            0
+            calc(80px + env(safe-area-inset-bottom))
 
-            max(16px, env(safe-area-inset-left));
+            max(14px, env(safe-area-inset-left));
     }
 
-    #archivePage,
-    #aboutPage{
+    /* 只有当前页面参与布局，隐藏页面必须彻底移出 */
 
-        overflow-y:auto;
+    .page.hidden{
 
-        -webkit-overflow-scrolling:touch;
-
-        padding-bottom:
-
-            max(28px, env(safe-area-inset-bottom));
+        display:none;
     }
-
-    /* 头部只保留标题 */
 
     .header{
+
+        flex:none;
 
         flex-wrap:nowrap;
 
         margin-bottom:10px;
-
-        flex-shrink:0;
     }
+
+    .header h1{
+
+        font-size:30px;
+    }
+
+    /* 顶部只保留标题和主题开关，其余功能移到底部栏 */
 
     #menuBtn,
     #somedayBtn,
-    #aboutBtn,
-    #themeBtn{
+    #aboutBtn{
 
         display:none;
     }
 
-    .subtitle{
+    #themeBtn{
 
-        display:none;
+        margin-left:auto;
+
+        width:44px;
+
+        height:44px;
+
+        font-size:22px;
     }
 
     .date-label{
 
-        margin-bottom:12px;
+        flex:none;
 
-        font-size:13px;
+        margin-bottom:10px;
 
-        flex-shrink:0;
+        font-size:12px;
     }
 
-    /* Today 工作区铺满剩余空间 */
+    #todayPage .subtitle{
 
-    #todayPage{
-
-        padding-bottom:
-
-            calc(78px + env(safe-area-inset-bottom));
+        display:none;
     }
 
-    #todayPage .workspace{
+    .workspace{
 
         flex:1;
 
         min-height:0;
+
+        display:flex;
 
         flex-direction:column;
 
         gap:0;
     }
 
-    #todayPage .todo-card{
+    .todo-card{
 
         flex:1;
 
@@ -4092,19 +4094,18 @@ body{
 
         height:auto;
 
-        padding:14px 14px 0;
+        padding:14px 14px 12px;
 
-        border-radius:30px;
+        border-radius:26px;
+
+        display:flex;
+
+        flex-direction:column;
     }
 
-    #todayPage .add-bar{
+    /* 任务列表内部滚动，页面本身不滚动 */
 
-        flex-shrink:0;
-
-        padding:12px 0 14px;
-    }
-
-    #todayPage #todoList{
+    #todoList{
 
         flex:1;
 
@@ -4112,129 +4113,200 @@ body{
 
         overflow-y:auto;
 
+        overscroll-behavior:contain;
+
         -webkit-overflow-scrolling:touch;
 
-        overscroll-behavior:contain;
+        padding:0 4px 0 0;
+    }
+
+    .add-bar{
+
+        flex:none;
+
+        margin-top:8px;
+
+        padding-top:12px;
     }
 
     /* 详情面板 → 底部抽屉 */
 
     #detailPanel{
 
-        position:fixed;
+        position:absolute;
 
-        left:0;
+        left:12px;
 
-        right:0;
+        right:12px;
 
-        top:auto;
-
-        bottom:0;
+        bottom:calc(82px + env(safe-area-inset-bottom));
 
         width:auto;
 
         min-height:0;
 
-        max-height:76vh;
-
-        max-height:76dvh;
-
-        margin:0;
-
-        padding:26px 20px calc(26px + env(safe-area-inset-bottom));
-
-        border-radius:30px 30px 0 0;
+        max-height:62%;
 
         overflow-y:auto;
 
-        -webkit-overflow-scrolling:touch;
+        overscroll-behavior:contain;
 
-        z-index:140;
+        padding:40px 18px 20px;
 
-        transform:translateY(112%);
+        border-radius:26px;
 
-        transition:transform .42s cubic-bezier(.22,1,.36,1);
+        z-index:40;
+
+        transform:translateY(calc(100% + 110px));
+
+        opacity:0;
+
+        pointer-events:none;
+
+        transition:
+
+            transform .34s
+            cubic-bezier(.22,1,.36,1),
+
+            opacity .22s ease;
     }
 
-    #detailPanel.detail-open{
+    #detailPanel.sheet-open{
 
         transform:translateY(0);
+
+        opacity:1;
+
+        pointer-events:auto;
     }
 
     /* 账号 → 底部抽屉 */
 
     #accountSection{
 
-        position:fixed;
+        position:absolute;
 
-        left:0;
+        left:12px;
 
-        right:0;
+        right:12px;
 
-        top:auto;
-
-        bottom:0;
+        bottom:calc(82px + env(safe-area-inset-bottom));
 
         width:auto;
 
-        max-height:84vh;
-
-        max-height:84dvh;
-
-        margin:0;
-
-        padding:22px 18px calc(22px + env(safe-area-inset-bottom));
-
-        border-radius:30px 30px 0 0;
-
-        background:#ffffff;
-
-        box-shadow:0 -14px 44px rgba(11,1,91,.3);
-
-        display:flex;
-
-        flex-direction:column;
-
-        gap:14px;
+        max-height:70%;
 
         overflow-y:auto;
 
-        -webkit-overflow-scrolling:touch;
+        overscroll-behavior:contain;
 
-        z-index:140;
+        padding:40px 12px 12px;
 
-        transform:translateY(112%);
-
-        transition:transform .42s cubic-bezier(.22,1,.36,1);
-    }
-
-    #accountSection.account-open{
-
-        transform:translateY(0);
-    }
-
-    #accountSection #accountCard{
-
-        height:auto;
-
-        min-height:0;
-
-        padding:0;
-
-        border:none;
-
-        border-radius:0;
+        gap:12px;
 
         background:transparent;
 
-        box-shadow:none;
+        display:none;
+
+        z-index:45;
     }
 
-    /* 底部功能栏 */
-
-    .mobile-bar{
+    body.account-open #accountSection{
 
         display:flex;
+    }
+
+    #accountCard{
+
+        height:auto;
+
+        flex:none;
+
+        margin-top:0;
+
+        border-radius:24px;
+
+        padding:20px 18px;
+    }
+
+    /* 关闭按钮 */
+
+    .sheet-close{
+
+        display:flex;
+
+        position:absolute;
+
+        top:10px;
+
+        right:12px;
+
+        width:32px;
+
+        height:32px;
+
+        align-items:center;
+
+        justify-content:center;
+
+        border:none;
+
+        border-radius:50%;
+
+        background:rgba(0,0,0,.06);
+
+        color:#666;
+
+        font-size:15px;
+
+        line-height:1;
+
+        cursor:pointer;
+
+        z-index:2;
+
+        -webkit-tap-highlight-color:transparent;
+    }
+
+    /* Archive 列表内部滚动 */
+
+    #archiveList{
+
+        flex:1;
+
+        min-height:0;
+
+        overflow-y:auto;
+
+        overscroll-behavior:contain;
+
+        -webkit-overflow-scrolling:touch;
+
+        padding-bottom:4px;
+    }
+
+    /* About 内容内部滚动 */
+
+    #aboutPage .about-card{
+
+        flex:1;
+
+        min-height:0;
+
+        overflow-y:auto;
+
+        overscroll-behavior:contain;
+
+        -webkit-overflow-scrolling:touch;
+
+        margin-bottom:0;
+    }
+
+    /* ========================= */
+    /* 底部功能栏 */
+    /* ========================= */
+
+    #mobileNav{
 
         position:fixed;
 
@@ -4244,34 +4316,36 @@ body{
 
         bottom:0;
 
-        z-index:120;
+        z-index:60;
 
-        align-items:center;
+        display:flex;
 
-        justify-content:space-around;
+        align-items:stretch;
 
-        gap:4px;
+        gap:2px;
 
-        padding:
+        height:calc(64px + env(safe-area-inset-bottom));
 
-            8px 12px
+        padding:6px 8px env(safe-area-inset-bottom);
 
-            calc(8px + env(safe-area-inset-bottom));
+        background:rgba(255,255,255,.92);
 
-        background:rgba(255,255,255,.9);
+        backdrop-filter:blur(16px);
 
-        -webkit-backdrop-filter:blur(18px);
+        -webkit-backdrop-filter:blur(16px);
 
-        backdrop-filter:blur(18px);
+        border-top:1px solid rgba(0,0,0,.06);
 
-        border-top:1px solid rgba(11,1,91,.08);
-
-        box-shadow:0 -8px 30px rgba(11,1,91,.14);
+        box-shadow:
+            0 -6px 24px
+            rgba(20,10,70,.08);
     }
 
-    .bar-item{
+    .nav-btn{
 
         flex:1;
+
+        min-width:0;
 
         display:flex;
 
@@ -4281,117 +4355,91 @@ body{
 
         justify-content:center;
 
-        gap:3px;
-
-        padding:6px 2px;
+        gap:2px;
 
         border:none;
 
-        background:transparent;
+        background:none;
 
-        color:#3a1d86;
+        border-radius:14px;
+
+        color:#8a8f9c;
 
         font-family:inherit;
 
-        border-radius:16px;
+        font-size:11px;
+
+        font-weight:600;
 
         cursor:pointer;
 
         -webkit-tap-highlight-color:transparent;
 
         transition:
-
-            transform .2s ease,
-
             color .2s ease,
-
-            background-color .2s ease;
+            background .2s ease,
+            transform .16s ease;
     }
 
-    .bar-item:active{
-
-        transform:scale(.94);
-
-        background:rgba(124,92,255,.12);
-    }
-
-    .bar-icon{
+    .nav-icon{
 
         font-size:20px;
 
         line-height:1;
     }
 
-    .bar-label{
+    .nav-label{
 
-        font-size:11px;
+        white-space:nowrap;
 
-        font-weight:600;
+        overflow:hidden;
 
-        letter-spacing:.2px;
+        text-overflow:ellipsis;
+
+        max-width:100%;
     }
 
-    /* 抽屉遮罩 */
+    .nav-btn.active{
 
-    .sheet-backdrop{
+        color:#4f3bd0;
 
-        display:block;
-
-        position:fixed;
-
-        left:0;
-
-        right:0;
-
-        top:0;
-
-        bottom:0;
-
-        z-index:130;
-
-        background:rgba(9,5,40,.42);
-
-        opacity:0;
-
-        pointer-events:none;
-
-        transition:opacity .34s ease;
+        background:rgba(124,92,255,.12);
     }
 
-    body.sheet-open .sheet-backdrop{
+    .nav-btn:active{
 
-        opacity:1;
-
-        pointer-events:auto;
+        transform:scale(.96);
     }
-}
 
-/* 手机端抽屉 · 夜间配色 */
+    /* 夜间模式 */
 
-[data-theme="night"] #accountSection{
+    [data-theme="night"] #mobileNav{
 
-    background:#171334;
+        background:rgba(23,19,52,.92);
 
-    box-shadow:0 -14px 44px rgba(0,0,0,.6);
-}
+        border-top-color:rgba(255,255,255,.08);
 
-[data-theme="night"] .mobile-bar{
+        box-shadow:
+            0 -6px 24px
+            rgba(0,0,0,.45);
+    }
 
-    background:rgba(23,19,52,.92);
+    [data-theme="night"] .nav-btn{
 
-    border-top-color:rgba(255,255,255,.08);
+        color:rgba(255,255,255,.5);
+    }
 
-    box-shadow:0 -8px 30px rgba(0,0,0,.5);
-}
+    [data-theme="night"] .nav-btn.active{
 
-[data-theme="night"] .bar-item{
+        color:#c7b9ff;
 
-    color:rgba(255,255,255,.7);
-}
+        background:rgba(124,92,255,.22);
+    }
 
-[data-theme="night"] .bar-item:active{
+    [data-theme="night"] .sheet-close{
 
-    background:rgba(124,92,255,.2);
+        background:rgba(255,255,255,.12);
 
-    color:#b9a9ff;
+        color:#e6e6f0;
+    }
 }
