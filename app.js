@@ -523,6 +523,11 @@ document.getElementById(
     "signupBtn"
 );
 
+const themeBtn =
+document.getElementById(
+    "themeBtn"
+);
+
 accountBtn.addEventListener(
 
     "click",
@@ -1614,7 +1619,7 @@ function renderTodos(){
     renderProfileStats();
 }
 
-function addTaskToProject(project, text){
+async function addTaskToProject(project, text){
 
     const target = currentTasks();
 
@@ -1642,13 +1647,29 @@ function addTaskToProject(project, text){
         expandedProjects.add(UNGROUPED_KEY);
     }
 
-    saveTodoToCloud(newTask);
-
     saveState();
 
     renderTodos();
 
     markNewItem(newTask.id);
+
+    // 云端插入后拿回真正的 id，并同步到 DOM，保证后续更新能命中
+
+    const localId = newTask.id;
+
+    await saveTodoToCloud(newTask);
+
+    if(String(newTask.id) !== String(localId)){
+
+        const li = todoList.querySelector(
+            `.todo-item[data-task-id="${localId}"]`
+        );
+
+        if(li){
+
+            li.dataset.taskId = String(newTask.id);
+        }
+    }
 }
 
 // -------------------------
@@ -3230,13 +3251,17 @@ async function saveTodoToCloud(task){
             : task.project_id
     };
 
-    let { error } =
+    let { data, error } =
 
     await sbClient
 
         .from("todo")
 
-        .insert(row);
+        .insert(row)
+
+        .select()
+
+        .single();
 
     if(
         error &&
@@ -3246,13 +3271,17 @@ async function saveTodoToCloud(task){
 
         delete row.day;
 
-        ({ error } =
+        ({ data, error } =
 
         await sbClient
 
             .from("todo")
 
-            .insert(row));
+            .insert(row)
+
+            .select()
+
+            .single());
     }
 
     if(
@@ -3263,13 +3292,17 @@ async function saveTodoToCloud(task){
 
         delete row.project_id;
 
-        ({ error } =
+        ({ data, error } =
 
         await sbClient
 
             .from("todo")
 
-            .insert(row));
+            .insert(row)
+
+            .select()
+
+            .single());
     }
 
     if(
@@ -3280,19 +3313,39 @@ async function saveTodoToCloud(task){
 
         delete row.priority;
 
-        ({ error } =
+        ({ data, error } =
 
         await sbClient
 
             .from("todo")
 
-            .insert(row));
+            .insert(row)
+
+            .select()
+
+            .single());
+    }
+
+    // 用云端返回的 id 回写本地任务，
+    // 否则后续 update/delete 会按本地时间戳 id 打不中云端记录
+
+    if(
+        data &&
+        data.id !== undefined &&
+        data.id !== null
+    ){
+
+        task.id = data.id;
+
+        saveState();
     }
 
     console.log(
         "ERROR",
         error
     );
+
+    return data;
 
 }
 
@@ -3630,7 +3683,7 @@ async function loadTodosFromCloud(){
 }
 
 
-function addTask(){
+async function addTask(){
 
     const text =
         taskInput.value.trim();
@@ -3656,7 +3709,7 @@ function addTask(){
 
         // selectedProject() 为 null 时表示「未分组」
 
-        addTaskToProject(selectedProject(), text);
+        await addTaskToProject(selectedProject(), text);
 
         return;
     }
@@ -3683,10 +3736,6 @@ function addTask(){
         newTask
     );
 
-    saveTodoToCloud(
-        newTask
-    );
-
 
     taskInput.value = "";
 
@@ -3697,6 +3746,26 @@ function addTask(){
     markNewItem(
         newTask.id
     );
+
+    // 云端插入后拿回真正的 id，并同步到 DOM，保证后续更新能命中
+
+    const localId = newTask.id;
+
+    await saveTodoToCloud(
+        newTask
+    );
+
+    if(String(newTask.id) !== String(localId)){
+
+        const li = todoList.querySelector(
+            `.todo-item[data-task-id="${localId}"]`
+        );
+
+        if(li){
+
+            li.dataset.taskId = String(newTask.id);
+        }
+    }
 }
 
 addBtn.addEventListener(
@@ -3792,6 +3861,55 @@ taskInput.addEventListener(
 // Archive
 // -------------------------
 
+// 列表 ↔ 某天详情 的滑动淡入淡出
+
+const ARCHIVE_VIEW_DURATION = 220;
+
+let archiveViewBusy = false;
+
+function switchArchiveView(render, direction){
+
+    if(archiveViewBusy){
+
+        return;
+    }
+
+    archiveViewBusy = true;
+
+    const back =
+        direction === "back";
+
+    const outClass =
+        back
+        ? "archive-view-out-right"
+        : "archive-view-out-left";
+
+    const inClass =
+        back
+        ? "archive-view-in-left"
+        : "archive-view-in-right";
+
+    archiveList.classList.add(outClass);
+
+    setTimeout(()=>{
+
+        render();
+
+        archiveList.classList.remove(outClass);
+
+        archiveList.classList.add(inClass);
+
+        // 强制回流，让起始位移立即生效
+
+        void archiveList.offsetWidth;
+
+        archiveList.classList.remove(inClass);
+
+        archiveViewBusy = false;
+
+    }, ARCHIVE_VIEW_DURATION);
+}
+
 function renderArchive(){
 
     renderProfileStats();
@@ -3821,93 +3939,392 @@ function renderArchive(){
         somedayTasks.length === 0
     ){
 
-        archiveList.innerHTML =
+        const empty =
+            document.createElement(
+                "div"
+            );
 
-        `
-        <div class="archive-item">
-            暂无历史记录
-        </div>
-        `;
+        empty.className =
+            "archive-empty";
+
+        empty.textContent =
+            "还没有归档记录";
+
+        archiveList.appendChild(
+            empty
+        );
 
         return;
     }
 
     // 置顶：已完成的 Someday
 
-    const somedayItem =
-        document.createElement(
-            "div"
-        );
-
-    somedayItem.className =
-        "archive-item archive-someday";
-
-    somedayItem.innerHTML =
-
-    `
-    <strong>
-    🌿 ${SOMEDAY_ARCHIVE_KEY}
-    </strong>
-
-    <span class="archive-count">
-    ${somedayTasks.length}
-    </span>
-    `;
-
-    somedayItem.addEventListener(
-
-        "click",
-
-        ()=>{
-
-            renderArchiveDay(
-                SOMEDAY_ARCHIVE_KEY
-            );
-        }
-    );
-
     archiveList.appendChild(
-        somedayItem
+
+        buildArchiveSummary({
+
+            key:
+                SOMEDAY_ARCHIVE_KEY,
+
+            icon:"🌿",
+
+            title:"Someday",
+
+            meta:"已完成的 Someday",
+
+            count:
+                somedayTasks.length,
+
+            accent:true
+        })
     );
 
     dates.forEach(
 
         date=>{
 
-            const item =
+            const tasks =
+                state.archive[date] || [];
+
+            const weekday =
+                archiveWeekday(date);
+
+            archiveList.appendChild(
+
+                buildArchiveSummary({
+
+                    key:date,
+
+                    title:
+                        archiveDateLabel(
+                            date
+                        ),
+
+                    meta:
+                        [
+                            weekday,
+                            tasks.length +
+                            " 条"
+                        ]
+                        .filter(Boolean)
+                        .join(" · "),
+
+                    count:
+                        tasks.length
+                })
+            );
+        }
+    );
+}
+
+// -------------------------
+// Archive · 日期显示与列表行
+// -------------------------
+
+const ARCHIVE_WEEKDAYS = [
+    "周日",
+    "周一",
+    "周二",
+    "周三",
+    "周四",
+    "周五",
+    "周六"
+];
+
+function archiveDateParts(date){
+
+    const parts =
+        String(date).split("-");
+
+    if(parts.length !== 3){
+
+        return null;
+    }
+
+    const y = Number(parts[0]);
+
+    const m = Number(parts[1]);
+
+    const d = Number(parts[2]);
+
+    if(!y || !m || !d){
+
+        return null;
+    }
+
+    return { y, m, d };
+}
+
+function archiveDateLabel(date){
+
+    const parts =
+        archiveDateParts(date);
+
+    if(!parts){
+
+        return String(date);
+    }
+
+    return `${parts.y}年${parts.m}月${parts.d}日`;
+}
+
+function archiveWeekday(date){
+
+    const parts =
+        archiveDateParts(date);
+
+    if(!parts){
+
+        return "";
+    }
+
+    const d = new Date(
+        parts.y,
+        parts.m - 1,
+        parts.d
+    );
+
+    return ARCHIVE_WEEKDAYS[
+        d.getDay()
+    ] || "";
+}
+
+function buildArchiveSummary({
+    key,
+    icon,
+    title,
+    meta,
+    count,
+    accent
+}){
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+    row.className =
+        "archive-item archive-summary" +
+        (accent
+            ? " archive-someday"
+            : "");
+
+    const main =
+        document.createElement(
+            "div"
+        );
+
+    main.className =
+        "archive-summary-main";
+
+    if(icon){
+
+        const iconEl =
             document.createElement(
-                "div"
+                "span"
             );
 
-            item.className =
-                "archive-item";
+        iconEl.className =
+            "archive-summary-icon";
 
-            item.innerHTML =
+        iconEl.textContent = icon;
 
-            `
-            <strong>
-            ${date}
-            </strong>
-            `;
+        main.appendChild(iconEl);
+    }
 
-            item.addEventListener(
+    const texts =
+        document.createElement(
+            "div"
+        );
 
-                "click",
+    texts.className =
+        "archive-summary-texts";
+
+    const titleEl =
+        document.createElement(
+            "strong"
+        );
+
+    titleEl.className =
+        "archive-date";
+
+    titleEl.textContent = title;
+
+    texts.appendChild(titleEl);
+
+    if(meta){
+
+        const metaEl =
+            document.createElement(
+                "span"
+            );
+
+        metaEl.className =
+            "archive-meta";
+
+        metaEl.textContent = meta;
+
+        texts.appendChild(metaEl);
+    }
+
+    main.appendChild(texts);
+
+    row.appendChild(main);
+
+    const right =
+        document.createElement(
+            "span"
+        );
+
+    right.className =
+        "archive-summary-right";
+
+    const countEl =
+        document.createElement(
+            "span"
+        );
+
+    countEl.className =
+        "archive-count";
+
+    countEl.textContent =
+        String(count);
+
+    right.appendChild(countEl);
+
+    const chevron =
+        document.createElement(
+            "span"
+        );
+
+    chevron.className =
+        "archive-chevron";
+
+    chevron.textContent = "›";
+
+    right.appendChild(chevron);
+
+    row.appendChild(right);
+
+    row.addEventListener(
+
+        "click",
+
+        ()=>{
+
+            switchArchiveView(
 
                 ()=>{
 
-                    renderArchiveDay(
-                        date
+                    renderArchiveDay(key);
+                },
+
+                "forward"
+            );
+        }
+    );
+
+    return row;
+}
+
+// 归档任务行（Someday / 日期）
+
+function buildArchiveTask(task, actions){
+
+    const item =
+        document.createElement(
+            "div"
+        );
+
+    item.className =
+        "archive-item archive-task-item";
+
+    const text =
+        document.createElement(
+            "div"
+        );
+
+    text.className =
+        "archive-task-text";
+
+    const mark =
+        document.createElement(
+            "span"
+        );
+
+    mark.className =
+        "archive-task-mark" +
+        (task.done ? " done" : "");
+
+    mark.textContent =
+        task.done ? "✓" : "○";
+
+    text.appendChild(mark);
+
+    const label =
+        document.createElement(
+            "span"
+        );
+
+    label.className =
+        "archive-task-label";
+
+    label.textContent = task.text;
+
+    text.appendChild(label);
+
+    const actionsEl =
+        document.createElement(
+            "div"
+        );
+
+    actionsEl.className =
+        "archive-task-actions";
+
+    actions.forEach(
+
+        action=>{
+
+            const btn =
+                document.createElement(
+                    "button"
+                );
+
+            btn.type = "button";
+
+            btn.className =
+                "archive-action-btn" +
+                (action.danger
+                    ? " archive-action-danger"
+                    : "");
+
+            btn.textContent =
+                action.label;
+
+            btn.addEventListener(
+
+                "click",
+
+                event=>{
+
+                    event.stopPropagation();
+
+                    collapseOut(
+                        item,
+                        action.onClick
                     );
                 }
             );
 
-            archiveList
-            .appendChild(
-                item
-            );
+            actionsEl.appendChild(btn);
         }
     );
+
+    item.appendChild(text);
+
+    item.appendChild(actionsEl);
+
+    return item;
 }
 
 // -------------------------
@@ -3933,11 +4350,13 @@ function renderArchiveDay(date){
 
     const back =
         document.createElement(
-            "div"
+            "button"
         );
 
+    back.type = "button";
+
     back.className =
-        "archive-item";
+        "archive-back";
 
     back.textContent =
         "← 返回";
@@ -3946,11 +4365,37 @@ function renderArchiveDay(date){
 
         "click",
 
-        renderArchive
+        ()=>{
+
+            switchArchiveView(
+                renderArchive,
+                "back"
+            );
+        }
     );
 
     archiveList.appendChild(
         back
+    );
+
+    const title =
+        document.createElement(
+            "div"
+        );
+
+    title.className =
+        "archive-detail-title";
+
+    title.textContent =
+
+        isSomeday
+
+        ? "Someday"
+
+        : archiveDateLabel(date);
+
+    archiveList.appendChild(
+        title
     );
 
     if(tasks.length === 0){
@@ -3961,7 +4406,7 @@ function renderArchiveDay(date){
             );
 
         empty.className =
-            "archive-item";
+            "archive-empty";
 
         empty.textContent =
             isSomeday
@@ -3979,150 +4424,64 @@ function renderArchiveDay(date){
 
         task=>{
 
-            const item =
-            document.createElement(
-                "div"
-            );
+            if(isSomeday){
 
-            item.className =
+                archiveList.appendChild(
 
-                isSomeday
+                    buildArchiveTask(task, [
 
-                ? "archive-item archive-task-item"
+                        {
 
-                : "archive-item";
+                            label:
+                                "移回 Someday",
 
-            if(!isSomeday){
+                            onClick:
+                                ()=>{
 
-                item.innerHTML =
+                                    restoreSomedayTask(
+                                        task.id
+                                    );
+                                }
+                        },
 
-                `
-                ${
-                task.done
-                ? "✓"
-                : "○"
-                }
+                        {
 
-                ${task.text}
-                `;
+                            label:"删除",
 
-                archiveList
-                .appendChild(
-                    item
+                            danger:true,
+
+                            onClick:
+                                ()=>{
+
+                                    deleteSomedayArchiveTask(
+                                        task.id
+                                    );
+                                }
+                        }
+                    ])
                 );
 
                 return;
             }
 
-            const text =
-                document.createElement(
-                    "div"
-                );
+            archiveList.appendChild(
 
-            text.className =
-                "archive-task-text";
+                buildArchiveTask(task, [
 
-            text.innerHTML =
+                    {
 
-            `
-            ${task.done ? "✓" : "○"}
+                        label:"移回 Today",
 
-            ${task.text}
-            `;
+                        onClick:
+                            ()=>{
 
-            const actions =
-                document.createElement(
-                    "div"
-                );
-
-            actions.className =
-                "archive-task-actions";
-
-            const restoreBtn =
-                document.createElement(
-                    "button"
-                );
-
-            restoreBtn.className =
-                "archive-action-btn";
-
-            restoreBtn.textContent =
-                "移回 Someday";
-
-            restoreBtn.addEventListener(
-
-                "click",
-
-                event=>{
-
-                    event.stopPropagation();
-
-                    collapseOut(
-
-                        item,
-
-                        ()=>{
-
-                            restoreSomedayTask(
-                                task.id
-                            );
-                        }
-                    );
-                }
-            );
-
-            const deleteBtn =
-                document.createElement(
-                    "button"
-                );
-
-            deleteBtn.className =
-                "archive-action-btn archive-action-danger";
-
-            deleteBtn.textContent =
-                "删除";
-
-            deleteBtn.addEventListener(
-
-                "click",
-
-                event=>{
-
-                    event.stopPropagation();
-
-                    collapseOut(
-
-                        item,
-
-                        ()=>{
-
-                            deleteSomedayArchiveTask(
-                                task.id
-                            );
-                        }
-                    );
-                }
-            );
-
-            actions.appendChild(
-                restoreBtn
-            );
-
-            actions.appendChild(
-                deleteBtn
-            );
-
-            item.appendChild(
-                text
-            );
-
-            item.appendChild(
-                actions
-            );
-
-            archiveList
-            .appendChild(
-                item
+                                restoreTodayArchiveTask(
+                                    task.id,
+                                    date
+                                );
+                            }
+                    }
+                ])
             );
         }
     );
@@ -4215,6 +4574,140 @@ function deleteSomedayArchiveTask(id){
 
     renderArchiveDay(
         SOMEDAY_ARCHIVE_KEY
+    );
+}
+
+// -------------------------
+// 归档的 Today：移回 Today
+// -------------------------
+
+function restoreTodayArchiveTask(id, date){
+
+    const bucket =
+        state.archive[date] || [];
+
+    const task =
+
+        bucket.find(
+
+            t =>
+
+            t.id === id
+        );
+
+    if(!task){
+
+        return;
+    }
+
+    task.done = false;
+
+    const rest =
+
+        bucket.filter(
+
+            t =>
+
+            t.id !== id
+        );
+
+    const isEmpty =
+        rest.length === 0;
+
+    if(isEmpty){
+
+        delete state.archive[date];
+
+    }else{
+
+        state.archive[date] =
+            rest;
+    }
+
+    if(
+        !state.today.some(
+
+            t =>
+
+            t.id === id
+        )
+    ){
+
+        state.today.unshift(
+            task
+        );
+    }
+
+    saveState();
+
+    restoreTodayInCloud(id);
+
+    if(currentMode === "today"){
+
+        renderTodos();
+    }
+
+    // 该日期已清空就退回列表，否则停留在当天
+
+    if(isEmpty){
+
+        renderArchive();
+
+    }else{
+
+        renderArchiveDay(date);
+    }
+}
+
+async function restoreTodayInCloud(id){
+
+    const fields = {
+
+        done: false,
+
+        mode: "today",
+
+        day: getTodayString()
+    };
+
+    let { error } =
+
+    await sbClient
+
+        .from("todo")
+
+        .update(fields)
+
+        .eq("id", id)
+
+        .select();
+
+    // 云端若没有 day 列，去掉后再试一次
+
+    if(
+        error &&
+        String(error.message)
+        .includes("day")
+    ){
+
+        delete fields.day;
+
+        ({ error } =
+
+        await sbClient
+
+            .from("todo")
+
+            .update(fields)
+
+            .eq("id", id)
+
+            .select());
+    }
+
+    console.log(
+        "RESTORE TODAY ERROR",
+        error
     );
 }
 
@@ -4380,6 +4873,117 @@ aboutBackBtn.addEventListener(
     "click",
 
     showTodayFromAbout
+);
+
+// -------------------------
+// Theme（夜间模式）
+// -------------------------
+
+const THEME_KEY = "today-theme";
+
+const darkQuery =
+window.matchMedia(
+    "(prefers-color-scheme: dark)"
+);
+
+function savedTheme(){
+
+    try{
+
+        const value =
+        localStorage.getItem(
+            THEME_KEY
+        );
+
+        if(
+            value === "day" ||
+            value === "night"
+        ){
+
+            return value;
+        }
+
+    }catch(e){}
+
+    return null;
+}
+
+function systemTheme(){
+
+    return darkQuery.matches
+    ? "night"
+    : "day";
+}
+
+function applyTheme(theme){
+
+    document
+    .documentElement
+    .dataset
+    .theme = theme;
+
+    if(themeBtn){
+
+        themeBtn.textContent =
+        theme === "night"
+        ? "☀️"
+        : "🌙";
+    }
+}
+
+function currentTheme(){
+
+    return document
+    .documentElement
+    .dataset
+    .theme === "night"
+    ? "night"
+    : "day";
+}
+
+function toggleTheme(){
+
+    const next =
+    currentTheme() === "night"
+    ? "day"
+    : "night";
+
+    try{
+
+        localStorage.setItem(
+            THEME_KEY,
+            next
+        );
+
+    }catch(e){}
+
+    applyTheme(next);
+}
+
+applyTheme(
+    savedTheme() || systemTheme()
+);
+
+themeBtn.addEventListener(
+
+    "click",
+
+    toggleTheme
+);
+
+darkQuery.addEventListener(
+
+    "change",
+
+    ()=>{
+
+        if(!savedTheme()){
+
+            applyTheme(
+                systemTheme()
+            );
+        }
+    }
 );
 
 // -------------------------

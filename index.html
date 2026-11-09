@@ -20,6 +20,43 @@
         rel="stylesheet"
         href="style.css">
 
+    <script>
+
+        (function(){
+
+            try{
+
+                var t =
+                localStorage.getItem(
+                    "today-theme"
+                );
+
+                if(
+                    t !== "day" &&
+                    t !== "night"
+                ){
+
+                    t =
+                    window
+                    .matchMedia(
+                        "(prefers-color-scheme: dark)"
+                    )
+                    .matches
+                    ? "night"
+                    : "day";
+                }
+
+                document
+                .documentElement
+                .dataset
+                .theme = t;
+
+            }catch(e){}
+
+        })();
+
+    </script>
+
 </head>
 
 <body>
@@ -48,7 +85,14 @@
             </h1>
 
             <button id="aboutBtn">
-            🌱 关于 Today
+            🌱 About Today
+            </button>
+
+            <button
+                id="themeBtn"
+                title="切换夜间模式"
+                aria-label="切换夜间模式">
+            🌙
             </button>
 
             <!-- <div id="authPanel" class="hidden">
@@ -208,13 +252,6 @@
             </h1>
 
         </header>
-
-        <p
-            class="subtitle">
-
-            已归档的过去。
-
-        </p>
 
         <div
             id="archiveList"

@@ -16,9 +16,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -138,9 +150,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -312,10 +336,21 @@ body{
     font-size:16px;
 
     font-family:
-        "Segoe UI Black",
         "Segoe UI",
+
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
         "STZhongsong",
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
         serif;
 
     outline:none;
@@ -440,6 +475,10 @@ body{
         8px;
 
     overflow:hidden;
+
+    border-radius:18px;
+
+    -webkit-tap-highlight-color:transparent;
 
     transition:
 
@@ -632,6 +671,10 @@ body{
 
     transform:
         translateY(-2px);
+
+    box-shadow:
+        0 12px 28px
+        rgba(37, 20, 131, .14);
 }
 
 /* 归档条目收起 */
@@ -702,9 +745,26 @@ body{
 
 .archive-count{
 
+    min-width:24px;
+
+    height:24px;
+
+    padding:0 8px;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:99px;
+
+    background:
+        rgba(79, 124, 255, .12);
+
     color:#4f7cff;
 
-    font-size:14px;
+    font-size:13px;
 
     font-weight:700;
 }
@@ -726,18 +786,62 @@ body{
     cursor:default;
 }
 
-.archive-task-item:hover{
-
-    transform:none;
-}
-
 .archive-task-text{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
 
     flex:1;
 
     min-width:0;
 
+    font-size:16px;
+
+    color:#0c4369;
+}
+
+.archive-task-label{
+
     overflow-wrap:anywhere;
+}
+
+.archive-task-mark{
+
+    width:22px;
+
+    height:22px;
+
+    flex-shrink:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:50%;
+
+    border:
+        2px solid
+        #cfd5e2;
+
+    color:transparent;
+
+    font-size:12px;
+
+    font-weight:700;
+}
+
+.archive-task-mark.done{
+
+    background:#4f7cff;
+
+    border-color:#4f7cff;
+
+    color:#ffffff;
 }
 
 .archive-task-actions{
@@ -787,6 +891,265 @@ body{
 .archive-action-danger:hover{
 
     background:#ffe1e1;
+}
+
+/* ========================= */
+/* Archive · 列表行与详情 */
+/* ========================= */
+
+.archive-list,
+.archive-back,
+.archive-action-btn{
+
+    font-family:
+        "Segoe UI",
+
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+        "STZhongsong",
+        "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
+        serif;
+}
+
+/* Archive · 列表 ↔ 详情 切换动画 */
+
+.archive-list{
+
+    transition:
+        opacity .22s ease,
+        transform .3s
+        cubic-bezier(.22, 1, .36, 1);
+}
+
+.archive-view-out-left{
+
+    opacity:0;
+
+    transform:translateX(-26px);
+}
+
+.archive-view-out-right{
+
+    opacity:0;
+
+    transform:translateX(26px);
+}
+
+.archive-view-in-right{
+
+    transition:none;
+
+    opacity:0;
+
+    transform:translateX(26px);
+}
+
+.archive-view-in-left{
+
+    transition:none;
+
+    opacity:0;
+
+    transform:translateX(-26px);
+}
+
+@media (prefers-reduced-motion: reduce){
+
+    .archive-list,
+    .archive-view-in-right,
+    .archive-view-in-left{
+
+        transition:none;
+    }
+}
+
+.archive-summary{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:16px;
+}
+
+.archive-summary-main{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    min-width:0;
+}
+
+.archive-summary-icon{
+
+    width:38px;
+
+    height:38px;
+
+    flex-shrink:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:12px;
+
+    background:
+        rgba(79, 124, 255, .10);
+
+    font-size:19px;
+
+    line-height:1;
+}
+
+.archive-someday .archive-summary-icon{
+
+    background:
+        rgba(76, 175, 128, .15);
+}
+
+.archive-summary-texts{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:2px;
+
+    min-width:0;
+}
+
+.archive-date{
+
+    font-size:17px;
+
+    font-weight:700;
+
+    color:#0c4369;
+
+    overflow-wrap:anywhere;
+}
+
+.archive-meta{
+
+    font-size:13px;
+
+    font-weight:500;
+
+    color:#8b93a8;
+}
+
+.archive-summary-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    flex-shrink:0;
+}
+
+.archive-chevron{
+
+    font-size:20px;
+
+    line-height:1;
+
+    color:#c6ccda;
+
+    transition:
+        transform .2s ease,
+        color .2s ease;
+}
+
+.archive-summary:hover .archive-chevron{
+
+    color:#4f7cff;
+
+    transform:translateX(2px);
+}
+
+.archive-back{
+
+    align-self:flex-start;
+
+    border:none;
+
+    background:none;
+
+    padding:2px 2px 8px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:
+        rgba(255, 255, 255, .72);
+
+    cursor:pointer;
+
+    transition:
+        color .2s ease,
+        transform .2s ease;
+}
+
+.archive-back:hover{
+
+    color:#ffffff;
+
+    transform:translateX(-2px);
+}
+
+.archive-detail-title{
+
+    font-size:20px;
+
+    font-weight:700;
+
+    letter-spacing:.2px;
+
+    color:
+        rgba(255, 255, 255, .92);
+
+    padding:0 2px 6px;
+}
+
+.archive-empty{
+
+    padding:44px 20px;
+
+    text-align:center;
+
+    font-size:15px;
+
+    color:
+        rgba(255, 255, 255, .7);
+
+    background:
+        rgba(255, 255, 255, .06);
+
+    border:
+        1.5px dashed
+        rgba(255, 255, 255, .26);
+
+    border-radius:18px;
 }
 
 .check::after{
@@ -1113,8 +1476,20 @@ body{
     font-family:
         "Segoe UI Black",
         "Segoe UI",
+
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
         "STZhongsong",
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
         serif;
 
     background:transparent;
@@ -1136,9 +1511,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -1354,6 +1741,13 @@ body{
         cubic-bezier(.4,0,.2,1);
 }
 
+/* Someday 文件夹内的 todo 字号略小 */
+
+.project-tasks .text{
+
+    font-size:19px;
+}
+
 .new-project-row{
 
     list-style:none;
@@ -1406,7 +1800,7 @@ body{
 
 .settings-title{
 
-    font-size:22px;
+    font-size:20px;
 
     font-weight:700;
 
@@ -1929,6 +2323,44 @@ body{
         scale(1.05);
 }
 
+#themeBtn{
+
+    width:56px;
+
+    height:56px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:white;
+
+    cursor:pointer;
+
+    font-size:24px;
+
+    line-height:1;
+
+    transition:.2s;
+
+    box-shadow:
+
+        0 4px 12px
+
+        rgba(
+            0,
+            0,
+            0,
+            .05
+        );
+}
+
+#themeBtn:hover{
+
+    transform:
+        scale(1.05);
+}
+
 .mode-switch{
 
     animation:
@@ -2127,8 +2559,20 @@ body{
     font-family:
         "Segoe UI Black",
         "Segoe UI",
+
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
         "STZhongsong",
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
         serif;
 }
 
@@ -2163,9 +2607,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -2266,9 +2722,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -2339,8 +2807,14 @@ body{
     font-family:
     "Segoe UI Black",
     "Segoe UI",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Helvetica Neue",
+    Arial,
     "STZhongsong",
     "华文中宋",
+    "PingFang SC",
+    "Hiragino Sans GB",
     serif;
         
 }
@@ -2376,8 +2850,20 @@ body{
     font-family:
         "Segoe UI Black",
         "Segoe UI",
+
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
         "STZhongsong",
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
         serif;
 
     
@@ -2444,9 +2930,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -2497,9 +2995,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -2555,9 +3065,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -2578,9 +3100,21 @@ body{
 
         "Segoe UI",
 
+        -apple-system,
+
+        BlinkMacSystemFont,
+
+        "Helvetica Neue",
+
+        Arial,
+
         "STZhongsong",
 
         "华文中宋",
+
+        "PingFang SC",
+
+        "Hiragino Sans GB",
 
         serif;
 
@@ -2651,6 +3185,7 @@ body{
 
     #menuBtn,
     #somedayBtn,
+    #themeBtn,
     #backBtn,
     #aboutBackBtn{
 
@@ -2845,6 +3380,11 @@ body{
         font-size:18px;
     }
 
+    .project-tasks .text{
+
+        font-size:16px;
+    }
+
     .new-project-row{
 
         font-size:16px;
@@ -2880,4 +3420,540 @@ body{
 
         font-size:15px;
     }
+}
+
+/* ========================= */
+/* Night mode */
+/* ========================= */
+
+[data-theme="night"]{
+
+    color-scheme:dark;
+
+    background:#0d0a22;
+}
+
+[data-theme="night"] body{
+
+    background:#0d0a22;
+
+    color:#e8eaf6;
+}
+
+/* Header */
+
+[data-theme="night"] #menuBtn,
+[data-theme="night"] #somedayBtn,
+[data-theme="night"] #themeBtn{
+
+    background:rgba(255,255,255,.10);
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.35);
+}
+
+[data-theme="night"] #aboutBtn{
+
+    background:rgba(255,255,255,.10);
+
+    color:#e8eaf6;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.35);
+}
+
+[data-theme="night"] #backBtn{
+
+    color:rgba(255,255,255,.85);
+}
+
+[data-theme="night"] #backBtn:hover{
+
+    color:#ffffff;
+}
+
+[data-theme="night"] #pageTitle{
+
+    -webkit-text-stroke-color:#0b0730;
+
+    text-shadow:
+        0 3px 0 #241a55,
+        0 8px 16px rgba(0,0,0,.5);
+}
+
+[data-theme="night"] .subtitle{
+
+    color:rgba(255,255,255,.6);
+}
+
+[data-theme="night"] .date-label{
+
+    color:rgba(255,255,255,.55);
+}
+
+/* Card */
+
+[data-theme="night"] .todo-card{
+
+    background:#171334;
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.55);
+}
+
+[data-theme="night"] .add-bar{
+
+    border-top-color:rgba(255,255,255,.08);
+}
+
+[data-theme="night"] #taskInput{
+
+    background:#221d45;
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] #taskInput::placeholder{
+
+    color:rgba(255,255,255,.4);
+}
+
+[data-theme="night"] #taskInput:disabled{
+
+    background:#1d1938;
+
+    color:rgba(255,255,255,.35);
+}
+
+[data-theme="night"] #addBtn:disabled{
+
+    background:#2c2850;
+
+    color:rgba(255,255,255,.4);
+}
+
+[data-theme="night"] #todoList{
+
+    scrollbar-color:#6a58c8 #221d45;
+}
+
+[data-theme="night"] #todoList::-webkit-scrollbar-track{
+
+    background:#221d45;
+}
+
+[data-theme="night"] #todoList::-webkit-scrollbar-thumb{
+
+    background:#6a58c8;
+}
+
+/* Todo 条目 */
+
+[data-theme="night"] .check{
+
+    border-color:rgba(255,255,255,.35);
+}
+
+[data-theme="night"] .text{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .todo-item.done .text{
+
+    color:rgba(255,255,255,.4);
+}
+
+[data-theme="night"] .todo-item.selected{
+
+    background:#292059;
+}
+
+/* Detail Panel */
+
+[data-theme="night"] #detailPanel{
+
+    background:#171334;
+
+    border-color:rgba(255,255,255,.08);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.55);
+}
+
+[data-theme="night"] .empty-detail{
+
+    color:rgba(255,255,255,.5);
+}
+
+[data-theme="night"] .empty-title{
+
+    color:rgba(255,255,255,.85);
+}
+
+[data-theme="night"] .empty-subtitle{
+
+    color:rgba(255,255,255,.65);
+}
+
+[data-theme="night"] .empty-desc{
+
+    color:rgba(255,255,255,.45);
+}
+
+[data-theme="night"] .detail-title{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .detail-title:hover,
+[data-theme="night"] .detail-title:focus{
+
+    background:rgba(255,255,255,.06);
+
+    border-bottom-color:rgba(255,255,255,.2);
+}
+
+[data-theme="night"] .detail-content{
+
+    color:rgba(255,255,255,.5);
+}
+
+[data-theme="night"] .detail-input{
+
+    color:rgba(255,255,255,.75);
+}
+
+[data-theme="night"] .detail-input::placeholder{
+
+    color:rgba(255,255,255,.35);
+}
+
+/* Project */
+
+[data-theme="night"] .project-header:hover{
+
+    background:rgba(255,255,255,.05);
+}
+
+[data-theme="night"] .project-group.selected
+.project-header{
+
+    background:rgba(124,92,255,.18);
+}
+
+[data-theme="night"] .project-name{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .project-count{
+
+    background:rgba(124,92,255,.22);
+
+    color:#b9a9ff;
+}
+
+[data-theme="night"] .project-arrow{
+
+    color:rgba(255,255,255,.4);
+}
+
+[data-theme="night"] .new-project-row{
+
+    border-color:rgba(255,255,255,.16);
+
+    color:#b9a9ff;
+}
+
+[data-theme="night"] .new-project-row:hover{
+
+    background:rgba(124,92,255,.14);
+
+    border-color:rgba(124,92,255,.5);
+}
+
+[data-theme="night"] .settings-title{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .settings-label{
+
+    color:rgba(255,255,255,.45);
+}
+
+[data-theme="night"] .settings-name-input{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .settings-name-input:hover,
+[data-theme="night"] .settings-name-input:focus{
+
+    background:rgba(255,255,255,.06);
+
+    border-bottom-color:rgba(255,255,255,.2);
+}
+
+[data-theme="night"] .icon-choice{
+
+    background:rgba(255,255,255,.07);
+}
+
+[data-theme="night"] .icon-choice:hover{
+
+    background:rgba(124,92,255,.2);
+}
+
+[data-theme="night"] .icon-choice.active{
+
+    background:rgba(124,92,255,.25);
+}
+
+[data-theme="night"] .move-target{
+
+    background:rgba(255,255,255,.07);
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .move-target:hover{
+
+    background:rgba(124,92,255,.2);
+}
+
+[data-theme="night"] .move-target.active{
+
+    background:rgba(124,92,255,.25);
+
+    color:#cfc4ff;
+}
+
+[data-theme="night"] .priority-value{
+
+    color:rgba(255,255,255,.55);
+}
+
+[data-theme="night"] .delete-project-btn{
+
+    background:rgba(255,107,107,.14);
+}
+
+[data-theme="night"] .delete-project-btn:hover{
+
+    background:rgba(255,107,107,.24);
+}
+
+/* Archive */
+
+[data-theme="night"] .archive-item{
+
+    background:#171334;
+
+    box-shadow:
+        0 4px 12px rgba(0,0,0,.4);
+}
+
+[data-theme="night"] .archive-item:hover{
+
+    box-shadow:
+        0 12px 28px rgba(0,0,0,.5);
+}
+
+[data-theme="night"] .archive-someday{
+
+    background:
+        linear-gradient(
+            135deg,
+            #1c1840,
+            #171334
+        );
+
+    border-color:rgba(124,92,255,.35);
+}
+
+[data-theme="night"] .archive-count{
+
+    background:rgba(124,92,255,.24);
+
+    color:#b9a9ff;
+}
+
+[data-theme="night"] .archive-task-text{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .archive-task-mark{
+
+    border-color:rgba(255,255,255,.35);
+}
+
+[data-theme="night"] .archive-action-btn{
+
+    background:rgba(124,92,255,.22);
+
+    color:#b9a9ff;
+}
+
+[data-theme="night"] .archive-action-btn:hover{
+
+    background:rgba(124,92,255,.34);
+}
+
+[data-theme="night"] .archive-action-danger{
+
+    background:rgba(255,107,107,.14);
+
+    color:#ff8a8a;
+}
+
+[data-theme="night"] .archive-action-danger:hover{
+
+    background:rgba(255,107,107,.24);
+}
+
+[data-theme="night"] .archive-summary-icon{
+
+    background:rgba(124,92,255,.18);
+}
+
+[data-theme="night"] .archive-someday
+.archive-summary-icon{
+
+    background:rgba(76,175,128,.22);
+}
+
+[data-theme="night"] .archive-date{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .archive-meta{
+
+    color:rgba(255,255,255,.5);
+}
+
+[data-theme="night"] .archive-chevron{
+
+    color:rgba(255,255,255,.4);
+}
+
+[data-theme="night"] .archive-summary:hover
+.archive-chevron{
+
+    color:#b9a9ff;
+}
+
+[data-theme="night"] .archive-back{
+
+    color:rgba(255,255,255,.72);
+}
+
+[data-theme="night"] .archive-back:hover{
+
+    color:#ffffff;
+}
+
+/* Account */
+
+[data-theme="night"] #authPanel{
+
+    background:#171334;
+}
+
+[data-theme="night"] #authPanel input{
+
+    background:rgba(255,255,255,.08);
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] #accountCard{
+
+    background:#171334;
+
+    border-color:rgba(255,255,255,.08);
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.5);
+}
+
+[data-theme="night"] .auth-field{
+
+    background:rgba(255,255,255,.07);
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] .auth-field::placeholder{
+
+    color:rgba(255,255,255,.4);
+}
+
+[data-theme="night"] .auth-field:hover{
+
+    background:rgba(255,255,255,.1);
+}
+
+[data-theme="night"] .auth-field:focus{
+
+    background:rgba(255,255,255,.1);
+}
+
+[data-theme="night"] #accountCard .profile-name,
+[data-theme="night"] .profile-name{
+
+    color:#e8eaf6;
+}
+
+[data-theme="night"] #accountCard .profile-bio,
+[data-theme="night"] .profile-bio{
+
+    color:rgba(255,255,255,.65);
+}
+
+[data-theme="night"] .profile-stats{
+
+    color:rgba(255,255,255,.5);
+}
+
+[data-theme="night"] #accountCard .profile-name:hover,
+[data-theme="night"] #accountCard .profile-bio:hover,
+[data-theme="night"] #accountCard .profile-name:focus,
+[data-theme="night"] #accountCard .profile-bio:focus{
+
+    background:rgba(255,255,255,.06);
+
+    border-bottom-color:rgba(255,255,255,.2);
+}
+
+[data-theme="night"] #signupBtn{
+
+    background:rgba(255,255,255,.12);
+
+    color:#e8eaf6;
+}
+
+/* About */
+
+[data-theme="night"] .about-card{
+
+    background:#171334;
+
+    color:#e8eaf6;
+
+    box-shadow:
+        0 12px 40px rgba(0,0,0,.55);
+}
+
+[data-theme="night"] .about-motto{
+
+    color:#b9a9ff;
+}
+
+[data-theme="night"] .about-version{
+
+    color:rgba(255,255,255,.5);
 }
