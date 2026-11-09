@@ -528,22 +528,18 @@ document.getElementById(
     "themeBtn"
 );
 
-if(authPanel){
+accountBtn.addEventListener(
 
-    accountBtn.addEventListener(
+    "click",
 
-        "click",
+    ()=>{
 
-        ()=>{
+        authPanel.classList.toggle(
+            "hidden"
+        );
 
-            authPanel.classList.toggle(
-                "hidden"
-            );
-
-        }
-
-    );
-}
+    }
+);
 
 // // signupBtn.addEventListener(
 
@@ -968,8 +964,6 @@ function showEmptyDetail(){
     selectedTaskId = null;
 
     selectedProjectId = null;
-
-    closeDetailSheet();
 
     renderEmptyDetailContent();
 }
@@ -1570,8 +1564,6 @@ function renderTodos(){
 
         renderProfileStats();
 
-        updateMobileNav();
-
         return;
     }
 
@@ -1625,8 +1617,6 @@ function renderTodos(){
     updateAddBarState();
 
     renderProfileStats();
-
-    updateMobileNav();
 }
 
 async function addTaskToProject(project, text){
@@ -2281,8 +2271,6 @@ function selectGroup(project){
     if(project){
 
         renderProjectSettings(project);
-
-        openDetailSheet();
 
     }else{
 
@@ -3087,8 +3075,6 @@ function buildTaskItem(task, groupEl){
                     detailPanel.classList.add(
                         "detail-fade"
                     );
-
-                    openDetailSheet();
 
                     const titleInput =
                     document.getElementById(
@@ -4832,8 +4818,6 @@ function showArchive(){
         archivePage,
         "forward"
     );
-
-    setMobileNavActive("archive");
 }
 
 function showAbout(){
@@ -4843,8 +4827,6 @@ function showAbout(){
         aboutPage,
         "forward"
     );
-
-    setMobileNavActive("about");
 }
 
 function showTodayFromAbout(){
@@ -4854,12 +4836,6 @@ function showTodayFromAbout(){
         todayPage,
         "back"
     );
-
-    setMobileNavActive(
-        currentMode === "someday"
-        ? "someday"
-        : "today"
-    );
 }
 
 function showToday(){
@@ -4868,12 +4844,6 @@ function showToday(){
         archivePage,
         todayPage,
         "back"
-    );
-
-    setMobileNavActive(
-        currentMode === "someday"
-        ? "someday"
-        : "today"
     );
 }
 
@@ -4904,286 +4874,6 @@ aboutBackBtn.addEventListener(
 
     showTodayFromAbout
 );
-
-// -------------------------
-// 手机 · 底部导航与抽屉
-// -------------------------
-
-const mobileNav =
-document.getElementById(
-    "mobileNav"
-);
-
-function openDetailSheet(){
-
-    if(!detailPanel){
-
-        return;
-    }
-
-    if(
-        !detailPanel.querySelector(
-            ".sheet-close"
-        )
-    ){
-
-        const closeBtn =
-            document.createElement(
-                "button"
-            );
-
-        closeBtn.type = "button";
-
-        closeBtn.className =
-            "sheet-close";
-
-        closeBtn.setAttribute(
-            "aria-label",
-            "关闭"
-        );
-
-        closeBtn.textContent = "✕";
-
-        closeBtn.addEventListener(
-            "click",
-            showEmptyDetail
-        );
-
-        detailPanel.prepend(
-            closeBtn
-        );
-    }
-
-    detailPanel.classList.add(
-        "sheet-open"
-    );
-}
-
-function closeDetailSheet(){
-
-    if(!detailPanel){
-
-        return;
-    }
-
-    detailPanel.classList.remove(
-        "sheet-open"
-    );
-}
-
-function setMobileNavActive(name){
-
-    if(!mobileNav){
-
-        return;
-    }
-
-    mobileNav
-    .querySelectorAll(".nav-btn")
-    .forEach(
-        btn =>
-        btn.classList.toggle(
-            "active",
-            btn.dataset.nav === name
-        )
-    );
-}
-
-function updateMobileNav(){
-
-    if(!mobileNav){
-
-        return;
-    }
-
-    let active =
-        document.body.classList.contains(
-            "account-open"
-        )
-        ? "account"
-        : "";
-
-    if(!active){
-
-        if(
-            !aboutPage.classList.contains(
-                "hidden"
-            )
-        ){
-
-            active = "about";
-
-        }else if(
-            !archivePage.classList.contains(
-                "hidden"
-            )
-        ){
-
-            active = "archive";
-
-        }else{
-
-            active =
-                currentMode === "someday"
-                ? "someday"
-                : "today";
-        }
-    }
-
-    setMobileNavActive(active);
-}
-
-if(mobileNav){
-
-    mobileNav.addEventListener(
-
-        "click",
-
-        event=>{
-
-            const btn =
-                event.target.closest(
-                    ".nav-btn"
-                );
-
-            if(!btn){
-
-                return;
-            }
-
-            const target =
-                btn.dataset.nav;
-
-            const accountWasOpen =
-                document.body.classList.contains(
-                    "account-open"
-                );
-
-            document.body.classList.remove(
-                "account-open"
-            );
-
-            closeDetailSheet();
-
-            const onArchive =
-                !archivePage.classList.contains(
-                    "hidden"
-                );
-
-            const onAbout =
-                !aboutPage.classList.contains(
-                    "hidden"
-                );
-
-            if(target === "account"){
-
-                if(!accountWasOpen){
-
-                    if(onArchive){
-
-                        showToday();
-
-                    }else if(onAbout){
-
-                        showTodayFromAbout();
-                    }
-
-                    document.body.classList.add(
-                        "account-open"
-                    );
-                }
-
-            }else if(target === "archive"){
-
-                if(!onArchive){
-
-                    if(onAbout){
-
-                        renderArchive();
-
-                        switchPage(
-                            aboutPage,
-                            archivePage,
-                            "forward"
-                        );
-
-                    }else{
-
-                        showArchive();
-                    }
-                }
-
-            }else if(target === "about"){
-
-                if(!onAbout){
-
-                    if(onArchive){
-
-                        switchPage(
-                            archivePage,
-                            aboutPage,
-                            "forward"
-                        );
-
-                    }else{
-
-                        showAbout();
-                    }
-                }
-
-            }else{
-
-                if(onArchive){
-
-                    showToday();
-
-                }else if(onAbout){
-
-                    showTodayFromAbout();
-                }
-
-                if(currentMode !== target){
-
-                    somedayBtn.click();
-                }
-            }
-
-            setMobileNavActive(
-                target === "account" &&
-                accountWasOpen
-                ? "today"
-                : target
-            );
-
-            setTimeout(
-                updateMobileNav,
-                660
-            );
-        }
-    );
-}
-
-const accountCloseBtn =
-document.getElementById(
-    "accountCloseBtn"
-);
-
-if(accountCloseBtn){
-
-    accountCloseBtn.addEventListener(
-
-        "click",
-
-        ()=>{
-
-            document.body.classList.remove(
-                "account-open"
-            );
-
-            updateMobileNav();
-        }
-    );
-}
 
 // -------------------------
 // Theme（夜间模式）
@@ -5324,8 +5014,6 @@ renderDate();
 renderTodos();
 
 renderArchive();
-
-updateMobileNav();
 
 (async ()=>{
 
