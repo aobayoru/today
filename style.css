@@ -3957,3 +3957,441 @@ body{
 
     color:rgba(255,255,255,.5);
 }
+
+/* ========================= */
+/* 手机端：底部功能栏 · 免上下滑动 */
+/* ========================= */
+
+.mobile-bar,
+.sheet-backdrop{
+
+    display:none;
+}
+
+@media (max-width:980px){
+
+    html,
+    body{
+
+        height:100vh;
+
+        height:100dvh;
+
+        overflow:hidden;
+
+        overscroll-behavior:none;
+    }
+
+    .page{
+
+        position:fixed;
+
+        top:0;
+
+        left:0;
+
+        right:0;
+
+        bottom:0;
+
+        width:auto;
+
+        height:100vh;
+
+        height:100dvh;
+
+        margin:0;
+
+        display:flex;
+
+        flex-direction:column;
+
+        overflow:hidden;
+
+        padding:
+
+            calc(env(safe-area-inset-top) + 16px)
+
+            max(16px, env(safe-area-inset-right))
+
+            0
+
+            max(16px, env(safe-area-inset-left));
+    }
+
+    #archivePage,
+    #aboutPage{
+
+        overflow-y:auto;
+
+        -webkit-overflow-scrolling:touch;
+
+        padding-bottom:
+
+            max(28px, env(safe-area-inset-bottom));
+    }
+
+    /* 头部只保留标题 */
+
+    .header{
+
+        flex-wrap:nowrap;
+
+        margin-bottom:10px;
+
+        flex-shrink:0;
+    }
+
+    #menuBtn,
+    #somedayBtn,
+    #aboutBtn,
+    #themeBtn{
+
+        display:none;
+    }
+
+    .subtitle{
+
+        display:none;
+    }
+
+    .date-label{
+
+        margin-bottom:12px;
+
+        font-size:13px;
+
+        flex-shrink:0;
+    }
+
+    /* Today 工作区铺满剩余空间 */
+
+    #todayPage{
+
+        padding-bottom:
+
+            calc(78px + env(safe-area-inset-bottom));
+    }
+
+    #todayPage .workspace{
+
+        flex:1;
+
+        min-height:0;
+
+        flex-direction:column;
+
+        gap:0;
+    }
+
+    #todayPage .todo-card{
+
+        flex:1;
+
+        min-height:0;
+
+        height:auto;
+
+        padding:14px 14px 0;
+
+        border-radius:30px;
+    }
+
+    #todayPage .add-bar{
+
+        flex-shrink:0;
+
+        padding:12px 0 14px;
+    }
+
+    #todayPage #todoList{
+
+        flex:1;
+
+        min-height:0;
+
+        overflow-y:auto;
+
+        -webkit-overflow-scrolling:touch;
+
+        overscroll-behavior:contain;
+    }
+
+    /* 详情面板 → 底部抽屉 */
+
+    #detailPanel{
+
+        position:fixed;
+
+        left:0;
+
+        right:0;
+
+        top:auto;
+
+        bottom:0;
+
+        width:auto;
+
+        min-height:0;
+
+        max-height:76vh;
+
+        max-height:76dvh;
+
+        margin:0;
+
+        padding:26px 20px calc(26px + env(safe-area-inset-bottom));
+
+        border-radius:30px 30px 0 0;
+
+        overflow-y:auto;
+
+        -webkit-overflow-scrolling:touch;
+
+        z-index:140;
+
+        transform:translateY(112%);
+
+        transition:transform .42s cubic-bezier(.22,1,.36,1);
+    }
+
+    #detailPanel.detail-open{
+
+        transform:translateY(0);
+    }
+
+    /* 账号 → 底部抽屉 */
+
+    #accountSection{
+
+        position:fixed;
+
+        left:0;
+
+        right:0;
+
+        top:auto;
+
+        bottom:0;
+
+        width:auto;
+
+        max-height:84vh;
+
+        max-height:84dvh;
+
+        margin:0;
+
+        padding:22px 18px calc(22px + env(safe-area-inset-bottom));
+
+        border-radius:30px 30px 0 0;
+
+        background:#ffffff;
+
+        box-shadow:0 -14px 44px rgba(11,1,91,.3);
+
+        display:flex;
+
+        flex-direction:column;
+
+        gap:14px;
+
+        overflow-y:auto;
+
+        -webkit-overflow-scrolling:touch;
+
+        z-index:140;
+
+        transform:translateY(112%);
+
+        transition:transform .42s cubic-bezier(.22,1,.36,1);
+    }
+
+    #accountSection.account-open{
+
+        transform:translateY(0);
+    }
+
+    #accountSection #accountCard{
+
+        height:auto;
+
+        min-height:0;
+
+        padding:0;
+
+        border:none;
+
+        border-radius:0;
+
+        background:transparent;
+
+        box-shadow:none;
+    }
+
+    /* 底部功能栏 */
+
+    .mobile-bar{
+
+        display:flex;
+
+        position:fixed;
+
+        left:0;
+
+        right:0;
+
+        bottom:0;
+
+        z-index:120;
+
+        align-items:center;
+
+        justify-content:space-around;
+
+        gap:4px;
+
+        padding:
+
+            8px 12px
+
+            calc(8px + env(safe-area-inset-bottom));
+
+        background:rgba(255,255,255,.9);
+
+        -webkit-backdrop-filter:blur(18px);
+
+        backdrop-filter:blur(18px);
+
+        border-top:1px solid rgba(11,1,91,.08);
+
+        box-shadow:0 -8px 30px rgba(11,1,91,.14);
+    }
+
+    .bar-item{
+
+        flex:1;
+
+        display:flex;
+
+        flex-direction:column;
+
+        align-items:center;
+
+        justify-content:center;
+
+        gap:3px;
+
+        padding:6px 2px;
+
+        border:none;
+
+        background:transparent;
+
+        color:#3a1d86;
+
+        font-family:inherit;
+
+        border-radius:16px;
+
+        cursor:pointer;
+
+        -webkit-tap-highlight-color:transparent;
+
+        transition:
+
+            transform .2s ease,
+
+            color .2s ease,
+
+            background-color .2s ease;
+    }
+
+    .bar-item:active{
+
+        transform:scale(.94);
+
+        background:rgba(124,92,255,.12);
+    }
+
+    .bar-icon{
+
+        font-size:20px;
+
+        line-height:1;
+    }
+
+    .bar-label{
+
+        font-size:11px;
+
+        font-weight:600;
+
+        letter-spacing:.2px;
+    }
+
+    /* 抽屉遮罩 */
+
+    .sheet-backdrop{
+
+        display:block;
+
+        position:fixed;
+
+        left:0;
+
+        right:0;
+
+        top:0;
+
+        bottom:0;
+
+        z-index:130;
+
+        background:rgba(9,5,40,.42);
+
+        opacity:0;
+
+        pointer-events:none;
+
+        transition:opacity .34s ease;
+    }
+
+    body.sheet-open .sheet-backdrop{
+
+        opacity:1;
+
+        pointer-events:auto;
+    }
+}
+
+/* 手机端抽屉 · 夜间配色 */
+
+[data-theme="night"] #accountSection{
+
+    background:#171334;
+
+    box-shadow:0 -14px 44px rgba(0,0,0,.6);
+}
+
+[data-theme="night"] .mobile-bar{
+
+    background:rgba(23,19,52,.92);
+
+    border-top-color:rgba(255,255,255,.08);
+
+    box-shadow:0 -8px 30px rgba(0,0,0,.5);
+}
+
+[data-theme="night"] .bar-item{
+
+    color:rgba(255,255,255,.7);
+}
+
+[data-theme="night"] .bar-item:active{
+
+    background:rgba(124,92,255,.2);
+
+    color:#b9a9ff;
+}

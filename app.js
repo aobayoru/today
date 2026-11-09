@@ -528,6 +528,46 @@ document.getElementById(
     "themeBtn"
 );
 
+const mobileBar =
+document.getElementById(
+    "mobileBar"
+);
+
+const barSomedayBtn =
+document.getElementById(
+    "barSomedayBtn"
+);
+
+const barArchiveBtn =
+document.getElementById(
+    "barArchiveBtn"
+);
+
+const barThemeBtn =
+document.getElementById(
+    "barThemeBtn"
+);
+
+const barAboutBtn =
+document.getElementById(
+    "barAboutBtn"
+);
+
+const barAccountBtn =
+document.getElementById(
+    "barAccountBtn"
+);
+
+const sheetBackdrop =
+document.getElementById(
+    "sheetBackdrop"
+);
+
+const accountSection =
+document.getElementById(
+    "accountSection"
+);
+
 accountBtn.addEventListener(
 
     "click",
@@ -3785,62 +3825,55 @@ document.getElementById(
     "pageTitle"
 );
 
+function toggleSomedayMode(){
+
+    if(
+        currentMode ===
+        "today"
+    ){
+
+        currentMode =
+            "someday";
+
+        pageTitle.textContent =
+            "Someday";
+
+    }else{
+
+        currentMode =
+            "today";
+
+        pageTitle.textContent =
+            "Today";
+    }
+
+    pageTitle.classList.remove(
+        "title-switch"
+    );
+
+    void pageTitle.offsetWidth;
+
+    pageTitle.classList.add(
+        "title-switch"
+    );
+
+    selectedTaskId = null;
+
+    selectedProjectId = null;
+
+    showEmptyDetail();
+
+    closeSheets();
+
+    renderTodos();
+}
+
 somedayBtn.addEventListener(
 
     "click",
 
-    ()=>{
-
-        if(
-            currentMode ===
-            "today"
-        ){
-
-            currentMode =
-                "someday";
-
-            pageTitle.textContent =
-                "Someday";
-
-            pageTitle.classList.remove(
-                "title-switch"
-            );
-
-            void pageTitle.offsetWidth;
-
-            pageTitle.classList.add(
-                "title-switch"
-            );
-
-        }else{
-
-            currentMode =
-                "today";
-
-            pageTitle.textContent =
-                "Today";
-
-            pageTitle.classList.remove(
-                "title-switch"
-            );
-
-            void pageTitle.offsetWidth;
-
-            pageTitle.classList.add(
-                "title-switch"
-            );
-        }
-
-        
-         selectedTaskId = null;
-
-        selectedProjectId = null;
-
-        showEmptyDetail();
-
-        renderTodos();
-    }
-);  
+    toggleSomedayMode
+);
 
 taskInput.addEventListener(
 
@@ -4811,6 +4844,8 @@ function switchPage(
 
 function showArchive(){
 
+    closeSheets();
+
     renderArchive();
 
     switchPage(
@@ -4821,6 +4856,8 @@ function showArchive(){
 }
 
 function showAbout(){
+
+    closeSheets();
 
     switchPage(
         todayPage,
@@ -4929,6 +4966,22 @@ function applyTheme(theme){
         ? "☀️"
         : "🌙";
     }
+
+    if(barThemeBtn){
+
+        const icon =
+        barThemeBtn.querySelector(
+            ".bar-icon"
+        );
+
+        if(icon){
+
+            icon.textContent =
+            theme === "night"
+            ? "☀️"
+            : "🌙";
+        }
+    }
 }
 
 function currentTheme(){
@@ -4985,6 +5038,188 @@ darkQuery.addEventListener(
         }
     }
 );
+
+// -------------------------
+// 手机端底部功能栏 · 抽屉
+// -------------------------
+
+function refreshSheetBackdrop(){
+
+    const open =
+
+        (detailPanel &&
+        detailPanel.classList.contains(
+            "detail-open"
+        ))
+        ||
+
+        (accountSection &&
+        accountSection.classList.contains(
+            "account-open"
+        ));
+
+    document.body.classList.toggle(
+        "sheet-open",
+        !!open
+    );
+}
+
+function closeSheets(){
+
+    if(detailPanel){
+
+        detailPanel.classList.remove(
+            "detail-open"
+        );
+    }
+
+    if(accountSection){
+
+        accountSection.classList.remove(
+            "account-open"
+        );
+    }
+
+    document.body.classList.remove(
+        "sheet-open"
+    );
+}
+
+if(detailPanel){
+
+    const detailObserver =
+
+    new MutationObserver(()=>{
+
+        const hasDetail =
+
+        detailPanel.querySelector(
+            ".empty-detail"
+        ) === null;
+
+        detailPanel.classList.toggle(
+            "detail-open",
+            hasDetail
+        );
+
+        if(hasDetail && accountSection){
+
+            accountSection.classList.remove(
+                "account-open"
+            );
+        }
+
+        refreshSheetBackdrop();
+    });
+
+    detailObserver.observe(
+
+        detailPanel,
+
+        {
+            childList:true
+        }
+    );
+}
+
+if(barSomedayBtn){
+
+    barSomedayBtn.addEventListener(
+
+        "click",
+
+        toggleSomedayMode
+    );
+}
+
+if(barArchiveBtn){
+
+    barArchiveBtn.addEventListener(
+
+        "click",
+
+        showArchive
+    );
+}
+
+if(barThemeBtn){
+
+    barThemeBtn.addEventListener(
+
+        "click",
+
+        toggleTheme
+    );
+}
+
+if(barAboutBtn){
+
+    barAboutBtn.addEventListener(
+
+        "click",
+
+        showAbout
+    );
+}
+
+if(barAccountBtn){
+
+    barAccountBtn.addEventListener(
+
+        "click",
+
+        ()=>{
+
+            const willOpen =
+
+            !accountSection.classList.contains(
+                "account-open"
+            );
+
+            if(willOpen){
+
+                showEmptyDetail();
+            }
+
+            accountSection.classList.toggle(
+                "account-open",
+                willOpen
+            );
+
+            refreshSheetBackdrop();
+        }
+    );
+}
+
+if(sheetBackdrop){
+
+    sheetBackdrop.addEventListener(
+
+        "click",
+
+        ()=>{
+
+            if(
+                detailPanel &&
+                detailPanel.classList.contains(
+                    "detail-open"
+                )
+            ){
+
+                showEmptyDetail();
+            }
+
+            if(accountSection){
+
+                accountSection.classList.remove(
+                    "account-open"
+                );
+            }
+
+            refreshSheetBackdrop();
+        }
+    );
+}
 
 // -------------------------
 // Init
